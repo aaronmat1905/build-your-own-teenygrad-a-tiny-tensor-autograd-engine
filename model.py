@@ -107,8 +107,17 @@ def lazybuffer_binary_e(self, op, other):
         raise ValueError(f"Operation name: {op.name} Does not Exist")
     return LazyBuffer(res)
 
-# Step 9 - lazybuffer_r (not yet solved)
-# TODO: implement
+# Step 9 - lazybuffer_r
+def r(self, op, axis):
+    # TODO: reduce the underlying array along axis (SUM or MAX), keeping reduced dims as size 1
+    name = getattr(op, 'name', None)
+    if op.name == "SUM": 
+        res = self._np.sum(axis = axis, keepdims = True)
+    elif op.name == "MAX": 
+        res = self._np.max(axis = axis, keepdims = True)
+    else: 
+        raise ValueError(f"Operation name: {op.name} Does not Exist")
+    return LazyBuffer(res)
 
 # Step 10 - lazybuffer_reshape (not yet solved)
 # TODO: implement
