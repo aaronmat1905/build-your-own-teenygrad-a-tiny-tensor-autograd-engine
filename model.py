@@ -62,8 +62,28 @@ def rand(shape, seed=None):
     data = rng.random(shape).astype(np.float32)
     return LazyBuffer(data)
 
-# Step 7 - lazybuffer_unary_e (not yet solved)
-# TODO: implement
+# Step 7 - lazybuffer_unary_e
+import enum 
+def e(self, op, *srcs):
+    # TODO: apply a unary elementwise op (NEG, RELU, LOG, EXP, SQRT, SIGMOID)
+    x = self._np
+    if op.name == 'NEG': 
+        result=  -x 
+    elif op.name == 'RELU': 
+        result= np.maximum(x, 0) 
+    elif op.name == 'EXP': 
+        result= np.exp(x)
+    elif op.name == 'SQRT': 
+        result= np.sqrt(x)
+    elif op.name == 'SIGMOID': 
+        result= 1.0 / (1.0+np.exp(-x))
+    elif op.name == 'LOG': 
+        result= np.log(x)
+    else: 
+        raise ValueError(f"Operation name: {op.name} Does not Exist")
+    return LazyBuffer(result)
+
+LazyBuffer.e = e
 
 # Step 8 - lazybuffer_binary_e (not yet solved)
 # TODO: implement
