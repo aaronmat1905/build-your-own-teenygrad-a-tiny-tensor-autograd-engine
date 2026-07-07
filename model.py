@@ -129,7 +129,7 @@ def expand(self, new_shape):
     # TODO: broadcast this buffer's size-1 dims out to new_shape
     new_shape = tuple(int(d) for d in new_shape)
     x = self._np
-    out = np.broadcast_to(x, new_shape)
+    out = np.broadcast_to(x, new_shape).copy()
     return LazyBuffer(np.array(out))
 
 # Step 12 - lazybuffer_permute (not yet solved)
