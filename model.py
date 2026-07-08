@@ -232,8 +232,19 @@ class Log(Function):
         _, BinaryOps, _, _ = make_op_enums()
         return lazybuffer_binary_e(grad_output, BinaryOps.DIV, self.x)
 
-# Step 19 - Exp (not yet solved)
-# TODO: implement
+# Step 19 - Exp
+class Exp(Function):
+    def forward(self, x):
+        # TODO: compute the elementwise exponential and keep what backward needs
+        UnaryOps, _, _, _ = make_op_enums()
+        y = x.e(UnaryOps.EXP)
+        self.ret = y 
+        return self.ret 
+
+    def backward(self, grad_output):
+        # TODO: turn the upstream gradient into the gradient w.r.t. the input
+        _, BinaryOps, _, _ = make_op_enums()
+        return lazybuffer_binary_e(self.ret, BinaryOps.MUL, grad_output)
 
 # Step 20 - Sqrt (not yet solved)
 # TODO: implement
