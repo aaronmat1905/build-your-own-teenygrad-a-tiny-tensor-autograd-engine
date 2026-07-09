@@ -509,8 +509,21 @@ def tensor_creation_helpers():
         return full_fn(shape, 1.0)
     return(zeros_fn, ones_fn, full_fn)
 
-# Step 37 - tensor_randn (not yet solved)
-# TODO: implement
+# Step 37 - tensor_randn
+def tensor_randn(shape, seed=None, requires_grad=False):
+    # TODO: Create a Tensor of standard-normal samples for the given shape.
+    shape = tuple(int(i) for i in shape)
+    seeded_rng = np.random.RandomState(seed)
+    u = seeded_rng.random((2,) + shape)
+    u1 = u[0]
+    u2 = u[1]
+    u1_clipped = np.clip(u1, 1e-12, 1.0)
+    # Apply the Box-Muller formula, cast to float32, wrap in LazyBuffer, then in Tensor with requires_grad.
+    # Review this once more
+    z = np.sqrt(-2.0 * np.log(u1_clipped)) * np.cos(2.0 * np.pi * u2)
+    z = z.astype(np.float32)
+
+    return Tensor(LazyBuffer(z), requires_grad=requires_grad)
 
 # Step 38 - build_topological_order (not yet solved)
 # TODO: implement
