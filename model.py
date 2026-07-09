@@ -489,8 +489,13 @@ class Tensor:
     def numpy(self):
         return self.lazydata._np
 
-# Step 35 - tensor_from_data (not yet solved)
-# TODO: implement
+# Step 35 - tensor_from_data
+def tensor_from_data(data, requires_grad=False):
+    # TODO: wrap a number, list, or numpy array in a LazyBuffer held by a Tensor
+    if not isinstance(data, LazyBuffer): 
+        data = np.asarray(data, dtype = np.float32)
+        data = LazyBuffer(data)
+    return Tensor(data, requires_grad=requires_grad)
 
 # Step 36 - tensor_creation_helpers (not yet solved)
 # TODO: implement
