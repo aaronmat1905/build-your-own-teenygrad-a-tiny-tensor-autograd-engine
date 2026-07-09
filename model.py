@@ -443,8 +443,16 @@ def expand_function_backward(ctx, grad_output):
     result = grad_output.r(SimpleNamespace(name='SUM'), axes)
     return result.reshape(input_shape)
 
-# Step 33 - permute_function_forward_backward (not yet solved)
-# TODO: implement
+# Step 33 - permute_function_forward_backward
+def permute_function_forward_backward():
+    # TODO: return (forward, backward); forward reorders axes, backward inverts the order
+    def forward(ctx, x, order): 
+        ctx.order = order 
+        return permute(x, order)
+    def backward(ctx, grad_output): 
+        inv = argsort(ctx.order)
+        return permute(grad_output, inv)
+    return forward, backward
 
 # Step 34 - Tensor (not yet solved)
 # TODO: implement
