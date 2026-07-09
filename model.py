@@ -432,8 +432,16 @@ def expand_function_forward(ctx, x, shape):
     out = np.broadcast_to(x._np, new_shape)
     return LazyBuffer(np.ascontiguousarray(out))
 
-# Step 32 - expand_function_backward (not yet solved)
-# TODO: implement
+# Step 32 - expand_function_backward
+def expand_function_backward(ctx, grad_output):
+    input_shape = ctx.input_shape
+    grad_shape = grad_output.shape
+
+    axes = tuple(i for i in range(len(input_shape))
+                 if input_shape[i] == 1 and grad_shape[i] != 1)
+
+    result = grad_output.r(SimpleNamespace(name='SUM'), axes)
+    return result.reshape(input_shape)
 
 # Step 33 - permute_function_forward_backward (not yet solved)
 # TODO: implement
