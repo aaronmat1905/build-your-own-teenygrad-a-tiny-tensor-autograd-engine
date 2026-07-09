@@ -359,8 +359,13 @@ class Sum(Function):
         result = x._np.sum(axis = axis, keepdims=True)
         return LazyBuffer(result)
 
-# Step 27 - sum_function_backward (not yet solved)
-# TODO: implement
+# Step 27 - sum_function_backward
+def backward(self, grad_output):
+    # TODO: broadcast the summed gradient back to the original input shape
+    grad = grad_output._np 
+    grad = np.broadcast_to(grad, self.input_shape)
+    grad = np.ascontiguousarray(grad)
+    return LazyBuffer(grad)
 
 # Step 28 - max_function_forward (not yet solved)
 # TODO: implement
