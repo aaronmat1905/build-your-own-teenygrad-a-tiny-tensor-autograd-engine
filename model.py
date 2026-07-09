@@ -377,8 +377,38 @@ class Max(Function):
         self.ret = LazyBuffer(arr)
         return self.ret
 
-# Step 29 - max_function_backward (not yet solved)
-# TODO: implement
+# Step 29 - max_function_backward
+LazyBuffer.r = r
+LazyBuffer.reshape = reshape
+LazyBuffer.expand = expand
+LazyBuffer.permute = permute
+
+def backward(self, grad_output):
+    _, BinaryOps, ReduceOps, _ = make_op_enums()
+
+    x_shape = self.x._np.shape
+
+    # Broadcast the reduced max back to the input shape
+    ret_exp = self.ret.expand(x_shape)
+
+    # Build a mask of maximal elements: 1 - (x < max)
+    ones = LazyBuffer.const(1, x_shape)
+    lt = lazybuffer_binary_e(self.x, BinaryOps.CMPLT, ret_exp)
+    mask = lazybuffer_binary_e(ones, BinaryOps.SUB, lt)
+
+    # Count ties and broadcast the counts
+    counts = mask.r(ReduceOps.SUM, self.axis)
+    counts = counts.expand(x_shape)
+
+    # Split the gradient evenly among tied maxima
+    weights = lazybuffer_binary_e(mask, BinaryOps.DIV, counts)
+
+    # Broadcast upstream gradient
+    grad = grad_output.expand(x_shape)
+
+    return lazybuffer_binary_e(weights, BinaryOps.MUL, grad)
+
+Max.backward = backward
 
 # Step 30 - Reshape (not yet solved)
 # TODO: implement
