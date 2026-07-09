@@ -276,8 +276,18 @@ class Sigmoid(Function):
         inter = lazybuffer_binary_e(self.ret, BinaryOps.MUL, neg)
         return lazybuffer_binary_e(inter, BinaryOps.MUL, grad_output)
 
-# Step 22 - Add (not yet solved)
-# TODO: implement
+# Step 22 - Add
+class Add(Function):
+    def forward(self, x, y):
+        # TODO: return the elementwise sum of LazyBuffers x and y
+        _, BinaryOps, _, _ = make_op_enums()
+        return lazybuffer_binary_e(x, BinaryOps.ADD, y)
+
+    def backward(self, grad_output):
+        # TODO: route grad_output to each input that requires a gradient
+        dx = grad_output if self.needs_input_grad[0] else None
+        dy = grad_output if self.needs_input_grad[1] else None
+        return dx, dy
 
 # Step 23 - Sub (not yet solved)
 # TODO: implement
