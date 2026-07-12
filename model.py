@@ -572,8 +572,25 @@ def tensor_backward(tensor):
 
     return None
 
-# Step 40 - bind_unary_tensor_methods (not yet solved)
-# TODO: implement
+# Step 40 - bind_unary_tensor_methods
+def function_apply(FunctionCls, *tensors, **kwargs):
+    return FunctionCls.apply(*tensors, **kwargs)
+    
+def bind_unary_tensor_methods():
+    def _make(F):
+        def method(t):
+            return function_apply(F, t)
+        return method
+
+    methods = {
+        'neg':     _make(Neg),
+        'relu':    _make(Relu),
+        'log':     _make(Log),
+        'exp':     _make(Exp),
+        'sqrt':    _make(Sqrt),
+        'sigmoid': _make(Sigmoid),
+    }
+    return methods
 
 # Step 41 - broadcasted (not yet solved)
 # TODO: implement
