@@ -592,8 +592,26 @@ def bind_unary_tensor_methods():
     }
     return methods
 
-# Step 41 - broadcasted (not yet solved)
-# TODO: implement
+# Step 41 - broadcasted
+def broadcasted(x, y):
+    rawX = x.data._np
+    rawY = y.data._np
+
+    bx, by = np.broadcast_arrays(rawX, rawY)
+
+    common_shape = bx.shape
+
+    if x.shape == common_shape:
+        new_x = x
+    else:
+        new_x = tensor_from_data(np.array(bx, dtype=np.float32))
+
+    if y.shape == common_shape:
+        new_y = y
+    else:
+        new_y = tensor_from_data(np.array(by, dtype=np.float32))
+
+    return new_x, new_y
 
 # Step 42 - bind_binary_tensor_methods (not yet solved)
 # TODO: implement
