@@ -641,8 +641,70 @@ def bind_binary_tensor_methods():
     Tensor.div = div 
     Tensor.__div__ = div
 
-# Step 43 - bind_movement_tensor_methods (not yet solved)
-# TODO: implement
+# Step 43 - bind_movement_tensor_methods
+def bind_movement_tensor_methods():
+    """
+        Some Theory: 
+        1.  Building classes at runtime: 
+            type(name, bases, namespace)
+                name -- a string 
+                bases -- a tuple of parent classes 
+                namespace -- a dict that becomes the classes' attributes and methods 
+            We build the class dynamically at runtime.
+        2. Tensor.__new__(Tensor)  
+            Allocates a blank, empty instance in memory (no attributes set yet)
+            **Why This??** Because we do not want the extra work done here, helps us not do redundant work and lets us build the lightest possible wrapper
+        3. Tensor.__init__(instance, data)
+            runs your __init__ body on that blank instance setting self.lazydata, self.requires_grad, etc... 
+    """
+    Expand = type(
+        'Expand', 
+        (Function, ), {
+            'forward': expand_function_forward, 
+            'backward': expand_function_backward, 
+        }
+    )
+    _permute_fwd, _permute_bwd = permute_function_forward_backward()
+    Permute = type(
+        'Permute', 
+        (Function, ), {
+            'forward': _permute_fwd, 
+            'backward': _permute_bwd, 
+        }
+    )
+
+    def _get_lazybuffer(t): 
+        for attr in ('lazydata', 'data', '_lazydata'): 
+            if hasattr(t, attr): 
+                val = getattr(t, attr)
+                if isinstance(val, LazyBuffer):
+                    return val 
+        return LazyBuffer(np.asarray(t))
+
+    def _wrap(out): 
+        t = Tensor.__new__(Tensor)
+        t.lazydata = out
+        return t 
+
+    def reshape(t, shape):
+        buf = _get_lazybuffer(t)
+        ctx = object.__new__(Reshape)
+        out = ctx.forward(buf, shape=tuple(shape))
+        return _wrap(out)
+
+    def expand(t, shape):
+        buf = _get_lazybuffer(t)
+        ctx = object.__new__(Expand)
+        out = ctx.forward(buf, shape=tuple(shape))
+        return _wrap(out)
+
+    def permute(t, order):
+        buf = _get_lazybuffer(t)
+        ctx = object.__new__(Permute)
+        out = ctx.forward(buf, order=tuple(order))
+        return _wrap(out)
+
+    return {'reshape': reshape, 'expand': expand, 'permute': permute}
 
 # Step 44 - bind_reduce_tensor_methods (not yet solved)
 # TODO: implement
