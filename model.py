@@ -800,8 +800,21 @@ def tensor_matmul_2d(a, b):
     # 5. Wrap back into a Tensor of the same class as a
     return type(a)(result.tolist())
 
-# Step 48 - tensor_softmax (not yet solved)
-# TODO: implement
+# Step 48 - tensor_softmax
+def tensor_softmax(x, axis=-1):
+    def _np(t):
+        for attr in ('lazydata', 'data', '_lazydata', 'buffer', '_data'):
+            if hasattr(t, attr):
+                buf = getattr(t, attr)
+                return buf._np if hasattr(buf, '_np') else buf
+        return np.asarray(t)
+
+    xn = _np(x)
+    m = xn.max(axis=axis, keepdims=True)
+    e = np.exp(xn - m)
+    denom = e.sum(axis=axis, keepdims=True)
+    out = e / denom
+    return tensor_from_data(out.tolist())
 
 # Step 49 - tensor_log_softmax (not yet solved)
 # TODO: implement
