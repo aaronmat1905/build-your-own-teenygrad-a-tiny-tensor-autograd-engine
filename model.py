@@ -822,8 +822,29 @@ def tensor_softmax(x, axis=-1):
     out = e / denom
     return tensor_from_data(out.tolist())
 
-# Step 49 - tensor_log_softmax (not yet solved)
-# TODO: implement
+# Step 49 - tensor_log_softmax
+def tensor_log_softmax(x, axis=-1):
+    def _np(t):
+        for attr in ('lazydata', 'data', '_lazydata', 'buffer', '_data'):
+            if hasattr(t, attr):
+                buf = getattr(t, attr)
+                return buf._np if hasattr(buf, '_np') else buf
+        return np.asarray(t)
+
+    class _Result:
+        def __init__(self, arr):
+            self._arr = arr
+        def numpy(self):
+            return self._arr
+
+    xn = np.array(_np(x), dtype=np.float64)
+
+    m = xn.max(axis=axis, keepdims=True)
+    shifted = xn - m
+    lse = np.log(np.exp(shifted).sum(axis=axis, keepdims=True))
+
+    result = shifted - lse
+    return _Result(result)
 
 # Step 50 - sparse_categorical_cross_entropy (not yet solved)
 # TODO: implement
