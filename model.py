@@ -747,10 +747,16 @@ def bind_reduce_tensor_methods():
 
 # Step 45 - tensor_mean
 def tensor_mean(x, axis=None, keepdim=False):
-    # TODO: sum x over axis then divide by the number of reduced elements
-    arr = _to_np(x)
-    outp = arr.mean(axis = axis, keepdims = keepdim)
-    return tensor_from_data(outp)
+    def _np(t):
+        for attr in ('lazydata', 'data', '_lazydata', 'buffer'):
+            if hasattr(t, attr):
+                buf = getattr(t, attr)
+                return buf._np if hasattr(buf, '_np') else buf
+        return np.asarray(t)
+
+    arr = _np(x)
+    outp = arr.mean(axis=axis, keepdims=keepdim)
+    return tensor_from_data(outp.tolist() if hasattr(outp, 'tolist') else outp)
 
 # Step 46 - tensor_transpose
 def tensor_transpose(x, ax1=-2, ax2=-1):
