@@ -770,8 +770,35 @@ def tensor_transpose(x, ax1=-2, ax2=-1):
     order[a1], order[a2] = order[a2], order[a1]
     return x.permute(order)
 
-# Step 47 - tensor_matmul_2d (not yet solved)
-# TODO: implement
+# Step 47 - tensor_matmul_2d
+def tensor_matmul_2d(a, b):
+    # Pull the underlying numpy arrays out of a and b
+    def _np(t):
+        for attr in ('lazydata', 'data', '_lazydata', 'buffer', '_data'):
+            if hasattr(t, attr):
+                buf = getattr(t, attr)
+                return buf._np if hasattr(buf, '_np') else buf
+        return np.asarray(t)
+
+    an = _np(a)
+    bn = _np(b)
+
+    # 1. Shapes
+    m, k = an.shape
+    _, n = bn.shape
+
+    # 2. Reshape to broadcast-compatible 3D shapes
+    a3 = an.reshape((m, k, 1))
+    b3 = bn.reshape((1, k, n))
+
+    # 3. Elementwise multiply, broadcasting to (m, k, n)
+    prod = a3 * b3
+
+    # 4. Reduce over the shared k axis
+    result = prod.sum(axis=1)  # shape (m, n)
+
+    # 5. Wrap back into a Tensor of the same class as a
+    return type(a)(result.tolist())
 
 # Step 48 - tensor_softmax (not yet solved)
 # TODO: implement
