@@ -899,8 +899,25 @@ class MLP:
         # TODO: return combined parameter list of both layers
         return self.l1.parameters() + self.l2.parameters()
 
-# Step 53 - sgd_step (not yet solved)
-# TODO: implement
+# Step 53 - sgd_step
+def sgd_step(parameters, learning_rate):
+    def _np(x):
+        if isinstance(x, LazyBuffer):
+            return x._np
+        return np.array(x, dtype=np.float32)
+
+    for p in parameters:
+        if p.grad is None:
+            continue
+
+        data_np = _np(p.data)
+        grad_np = _np(p.grad.data)
+
+        updated = data_np - learning_rate * grad_np
+
+        p.data = LazyBuffer(updated)
+
+    return None
 
 # Step 54 - zero_grad (not yet solved)
 # TODO: implement
