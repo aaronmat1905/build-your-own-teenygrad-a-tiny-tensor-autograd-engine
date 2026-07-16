@@ -960,8 +960,60 @@ def accuracy(logits, labels):
     pred = arr.argmax(axis=-1)
     return float((pred==np.asarray(labels)).mean())
 
-# Step 57 - train_mlp (not yet solved)
-# TODO: implement
+# Step 57 - train_mlp
+def train_mlp(X, y, epochs=50, learning_rate=0.1, hidden=16, seed=0):
+    X = np.asarray(X, dtype=np.float32)
+    y = np.asarray(y).astype(int).reshape(-1)
+
+    n_features = X.shape[1]
+    n_classes = int(y.max()) + 1
+    N = X.shape[0]
+
+    model = MLP(n_features, hidden, n_classes, seed=seed)
+
+    def _np(t):
+        d = t.data
+        return d._np if hasattr(d, '_np') else np.asarray(d)
+
+    losses = []
+
+    for epoch in range(epochs):
+        W1 = _np(model.l1.weight); b1 = _np(model.l1.bias)
+        W2 = _np(model.l2.weight); b2 = _np(model.l2.bias)
+
+        z1 = X @ W1 + b1
+        h = np.maximum(z1, 0.0)
+        logits = h @ W2 + b2
+
+        loss = sparse_categorical_cross_entropy(tensor_from_data(logits), y)
+        losses.append(float(loss.numpy()))
+
+        m = logits.max(axis=1, keepdims=True)
+        exp = np.exp(logits - m)
+        probs = exp / exp.sum(axis=1, keepdims=True)
+
+        dlogits = probs.copy()
+        dlogits[np.arange(N), y] -= 1.0
+        dlogits /= N
+
+        dW2 = h.T @ dlogits
+        db2 = dlogits.sum(axis=0)
+        dh = dlogits @ W2.T
+        dz1 = dh * (z1 > 0.0)
+        dW1 = X.T @ dz1
+        db1 = dz1.sum(axis=0)
+
+        W1 = (W1 - learning_rate * dW1).astype(np.float32)
+        b1 = (b1 - learning_rate * db1).astype(np.float32)
+        W2 = (W2 - learning_rate * dW2).astype(np.float32)
+        b2 = (b2 - learning_rate * db2).astype(np.float32)
+
+        model.l1.weight = Tensor(LazyBuffer(W1), requires_grad=True)
+        model.l1.bias   = Tensor(LazyBuffer(b1), requires_grad=True)
+        model.l2.weight = Tensor(LazyBuffer(W2), requires_grad=True)
+        model.l2.bias   = Tensor(LazyBuffer(b2), requires_grad=True)
+
+    return model, losses
 
 # Step 58 - evaluate_mlp (not yet solved)
 # TODO: implement
